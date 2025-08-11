@@ -12,6 +12,12 @@ The `input_select.select_option` service is called after the user clicks (select
 
 This is a fork of the original [Select List Card](https://github.com/mattieha/select-list-card) by [mattieha](https://github.com/mattieha). All credit for the original concept and implementation goes to the original author. This fork was created to address compatibility issues with recent Home Assistant updates, while also improving scrolling behavior and performance.
 
+## 🔧 Why This Fork Exists
+
+The original Select List Card stopped working after Home Assistant 2025.5 due to the removal of Polymer components and `paper-*` CSS variables. This fork addresses the compatibility issues and ensures the card continues to work with modern Home Assistant versions.
+
+**Original issue:** [Card not working after 2025.5](https://github.com/mattieha/select-list-card/issues/34) - Multiple users confirmed this fix resolves the problem.
+
 ## ✨ Version 2.0.1 - Home Assistant Compatibility & Fixed Scrolling
 
 **Major improvements:**
@@ -111,58 +117,7 @@ truncate: false         # Show full text for long options
 4. Restart Home Assistant
 5. Add the card using `custom:select-list-card`
 
-## 🔧 Technical Details
 
-### Browser Compatibility
-- Modern browsers with ES6+ support
-- Chrome 61+, Firefox 60+, Safari 12+, Edge 79+
-- **Compatible with Home Assistant 2024.x+**
-
-### Dependencies
-- **None!** Pure vanilla JavaScript implementation
-- No external libraries or build process required
-- Self-contained Web Component
-- **Updated for recent Home Assistant API changes**
-
-### Performance Features
-- Throttled updates prevent render loops
-- Smart scroll position preservation
-- Efficient DOM updates
-- Optimized for large option lists
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Card not loading:**
-- Verify the resource is added correctly
-- Check browser console for errors
-- Ensure the entity exists and is an `input_select`
-- **For older Home Assistant versions**: Consider using the [original card](https://github.com/mattieha/select-list-card)
-
-**Scrolling problems:**
-- Update to version 2.0.1+ for scroll fixes
-- Check `scroll_to_selected` and `max_options` settings
-
-**Compatibility issues:**
-- This version is optimized for Home Assistant 2024.x+
-- For older HA versions, the original card may work better
-
-**Visual issues:**
-- Clear browser cache
-- Verify Home Assistant theme compatibility
-
-### Debug Mode
-
-Enable additional logging by opening browser console. The card will show initialization and error messages.
-
-## 🌍 Supported Languages
-
-This card supports Home Assistant's built-in internationalization:
-
-- English
-- Nederlands (Dutch)
-- [Add more translations][add-translation]
 
 ## 🤝 Contributing
 
@@ -181,12 +136,6 @@ This fork is based on the excellent work by [mattieha](https://github.com/mattie
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-## ☕ Support
-
-If this card helps you, consider buying me a coffee!
-
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/mattijsha)
 
 ---
 
