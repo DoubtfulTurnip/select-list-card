@@ -166,14 +166,6 @@ Contributions are welcome! Please:
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
-## ☕ Support
-
-If this card helps you, consider buying me a coffee!
-
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/mattijsha)
-
----
-
 <!-- References -->
 [hacs]: https://hacs.xyz
 [visual-editor]: https://raw.githubusercontent.com/mattieha/select-list-card/master/assets/visual_editor.png
