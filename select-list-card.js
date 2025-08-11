@@ -1,13 +1,19 @@
-// Select List Card - Standalone Version (Performance Optimized)
+// Select List Card - Standalone Version
 // No external dependencies required
 
 console.info(
-  `%c  SELECT-LIST-CARD  \n%c  Version 2.0.2 (Performance Optimized)     `,
+  `%c  SELECT-LIST-CARD  \n%c  Version 2.0.2     `,
   "color: orange; font-weight: bold; background: black",
   "color: white; font-weight: bold; background: dimgray"
 );
 
 class SelectListCard extends HTMLElement {
+  // Constants
+  static get UPDATE_THROTTLE_MS() { return 50; }
+  static get SELECTION_TIMEOUT_MS() { return 2000; }
+  static get ERROR_FEEDBACK_DURATION_MS() { return 2000; }
+  static get DEFAULT_ITEM_HEIGHT() { return 48; }
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -64,6 +70,21 @@ class SelectListCard extends HTMLElement {
       throw new Error('Invalid configuration: entity must be an input_select');
     }
 
+    // Validate max_options
+    if (config.max_options !== undefined && (typeof config.max_options !== 'number' || config.max_options < 0)) {
+      throw new Error('Invalid configuration: max_options must be a number >= 0');
+    }
+
+    // Validate scroll_behavior
+    if (config.scroll_behavior && !['smooth', 'auto'].includes(config.scroll_behavior)) {
+      throw new Error('Invalid configuration: scroll_behavior must be "smooth" or "auto"');
+    }
+
+    // Validate icon format (basic check)
+    if (config.icon && typeof config.icon !== 'string') {
+      console.warn('Select List Card: Icon should be a string');
+    }
+
     // Set defaults
     this._config = {
       title: '',
@@ -112,9 +133,9 @@ class SelectListCard extends HTMLElement {
     
     // Throttle updates
     const now = performance.now();
-    if (now - this._lastUpdateTime < 50) { // Reduced from 100ms
+    if (now - this._lastUpdateTime < SelectListCard.UPDATE_THROTTLE_MS) {
       clearTimeout(this._updateTimeout);
-      this._updateTimeout = setTimeout(() => this._performUpdate(), 50);
+      this._updateTimeout = setTimeout(() => this._performUpdate(), SelectListCard.UPDATE_THROTTLE_MS);
       return;
     }
     
@@ -323,7 +344,15 @@ class SelectListCard extends HTMLElement {
     this._saveScrollPosition();
     this._isUpdating = true;
     
-    this._renderCard(entity);
+    // Check if we need a full re-render or just update existing elements
+    const needsFullRender = this._needsFullRender(entity);
+    
+    if (needsFullRender) {
+      this._renderCard(entity);
+      this._domCache.clear(); // Only clear cache when we do full render
+    } else {
+      this._updateExistingElements(entity);
+    }
     
     // Use requestAnimationFrame for DOM operations
     requestAnimationFrame(() => {
@@ -338,6 +367,28 @@ class SelectListCard extends HTMLElement {
         }
       }
       this._isUpdating = false;
+    });
+  }
+
+  _needsFullRender(entity) {
+    // Check if options changed (requires full re-render)
+    const currentOptions = JSON.stringify(entity.attributes.options || []);
+    const lastOptions = JSON.stringify(this._lastOptions || []);
+    
+    // Check if we don't have a rendered card yet
+    const hasCard = this.shadowRoot?.querySelector('.card-container');
+    
+    return !hasCard || currentOptions !== lastOptions;
+  }
+
+  _updateExistingElements(entity) {
+    const currentValue = entity.state;
+    
+    // Update selected state on existing options
+    const optionElements = this.shadowRoot.querySelectorAll('.option-item');
+    optionElements.forEach(el => {
+      const isSelected = el.dataset.option === currentValue;
+      el.classList.toggle('selected', isSelected);
     });
   }
 
@@ -366,7 +417,7 @@ class SelectListCard extends HTMLElement {
     
     // Calculate dimensions
     const maxOptions = this._config.max_options === 0 ? options.length : Math.min(this._config.max_options, options.length);
-    const itemHeight = 48;
+    const itemHeight = SelectListCard.DEFAULT_ITEM_HEIGHT;
     const listMaxHeight = maxOptions * itemHeight;
 
     // Generate styles
@@ -395,9 +446,6 @@ class SelectListCard extends HTMLElement {
         </div>
       </div>
     `;
-
-    // Clear cache since DOM was rebuilt
-    this._domCache.clear();
 
     // Add event listeners
     this._attachEventListeners();
@@ -445,7 +493,23 @@ class SelectListCard extends HTMLElement {
     return div.innerHTML;
   }
 
+  _cleanup() {
+    // Remove event listeners
+    const header = this.shadowRoot?.querySelector('.card-header.clickable');
+    if (header) {
+      header.removeEventListener('click', this._handleHeaderClick);
+    }
+    
+    const optionsList = this.shadowRoot?.querySelector('.options-list');
+    if (optionsList) {
+      optionsList.removeEventListener('scroll', this._handleScroll);
+    }
+  }
+
   _attachEventListeners() {
+    // Clean up existing listeners first
+    this._cleanup();
+    
     // Header click listener
     const header = this.shadowRoot.querySelector('.card-header.clickable');
     if (header) {
@@ -532,7 +596,7 @@ class SelectListCard extends HTMLElement {
         this._isSelecting = false;
         this._updateDisabledState(false);
       }
-    }, 2000);
+    }, SelectListCard.SELECTION_TIMEOUT_MS);
   }
 
   _showErrorFeedback(option) {
@@ -544,7 +608,7 @@ class SelectListCard extends HTMLElement {
         setTimeout(() => {
           el.style.backgroundColor = '';
           el.style.color = '';
-        }, 2000);
+        }, SelectListCard.ERROR_FEEDBACK_DURATION_MS);
       }
     });
   }
@@ -578,6 +642,7 @@ class SelectListCard extends HTMLElement {
   disconnectedCallback() {
     clearTimeout(this._updateTimeout);
     this._domCache.clear();
+    this._cleanup();
   }
 }
 
