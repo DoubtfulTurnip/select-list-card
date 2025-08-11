@@ -9,22 +9,18 @@ jobs:
     name: Prepare release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-
-      # Build
-      - name: Build the file
+      - uses: actions/checkout@v4
+      
+      - name: Validate JavaScript syntax
         run: |
-          cd /home/runner/work/select-list-card/select-list-card
-          npm install
-          npm run build
+          node -c select-list-card.js
+          echo "JavaScript syntax validation passed"
 
-      # Upload build file to the releas as an asset.
-      - name: Upload zip to release
-        uses: svenstaro/upload-release-action@v1-release
-
+      - name: Upload build file to release
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: /home/runner/work/select-list-card/select-list-card/dist/select-list-card.js
+          file: select-list-card.js
           asset_name: select-list-card.js
           tag: ${{ github.ref }}
           overwrite: true
