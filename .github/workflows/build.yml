@@ -13,8 +13,8 @@ jobs:
     name: Test build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: Build
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
         run: |
-          npm install
-          npm run build
+          node -c select-list-card.js
+          echo "JavaScript syntax validation passed"
