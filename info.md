@@ -18,13 +18,9 @@ Display the options of an `input_select` entity as a clickable list card.
 - Long lists of automation options
 - Any input_select with numerous choices
 
-## 🔧 Version 2.0.1 Improvements
+## 🙏 About This Fork
 
-- **Fixed scrolling issues** - Maintains scroll position during updates
-- **Better performance** - Optimized rendering and state management
-- **Enhanced error handling** - Visual feedback for failed selections
-- **Improved UX** - Prevents conflicts during option changes
-- **Home Assistant compatibility** - Updated for recent HA versions
+This is a maintained fork of the original [Select List Card](https://github.com/mattieha/select-list-card) by mattieha. This fork was created to address compatibility issues with recent Home Assistant updates and ensure continued functionality.
 
 ## Configuration
 
@@ -35,4 +31,27 @@ type: custom:select-list-card
 entity: input_select.my_options
 ```
 
-Full customization available with title, icons, scrolling behavior, and visual options.
+### Full Configuration Options
+
+```yaml
+type: custom:select-list-card
+entity: input_select.music_playlist
+title: Music Playlists
+icon: 'mdi:playlist-music'
+max_options: 6
+scroll_to_selected: true
+show_toggle: true
+truncate: true
+scroll_behavior: smooth
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `entity` | string | **required** | An `input_select` entity |
+| `title` | string | `""` | Card header title |
+| `icon` | string | `""` | Card header icon (any icon name) |
+| `show_toggle` | boolean | `false` | Show collapsible header |
+| `truncate` | boolean | `true` | Truncate long option text |
+| `scroll_to_selected` | boolean | `true` | Auto-scroll to selected option |
+| `max_options` | number | `5` | Max visible options (0 = unlimited) |
+| `scroll_behavior` | string | `smooth` | Scroll animation: `smooth` or `auto` |
