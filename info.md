@@ -1,6 +1,6 @@
 # Select List Card
 
-Display the options of an `input_select` entity as a clickable list card.
+Display the options of an `input_select` entity as a clickable list card. 
 
 ## ✨ Key Features
 
