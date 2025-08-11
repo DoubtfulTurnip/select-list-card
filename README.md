@@ -12,7 +12,7 @@ The `input_select.select_option` service is called after the user clicks (select
 
 This is a fork of the original [Select List Card](https://github.com/mattieha/select-list-card) by [mattieha](https://github.com/mattieha). All credit for the original concept and implementation goes to the original author. This fork was created to address compatibility issues with recent Home Assistant updates, while also improving scrolling behavior and performance.
 
-I should note, I am not a programmer, this repo was forked from someone who knows what they were doing. Most of these updates and changes have been provided by AI so please ensure you do your own testing. This all seems to work very well for my own needs and while I am more than happy to try and maintain this, I may not be very good at it. I am more than happy to be 'replaced' by someone who has more experience but for now, I will do my best to ensure this card continues to work as expected.
+I should note, I am not a programmer, this repo was forked from someone who knows what they were doing. Most of these updates and changes have been provided by AI so please ensure you do your own testing. This all seems to work very well for my own needs and while I am more than happy to try and maintain this, I may not be very good at it. I am more than happy to be 'replaced' by someone who has more experience but for now, I will do my best to ensure this card continues to work as expected. All hail Claude!
 
 ## 🔧 Why This Fork Exists
 
