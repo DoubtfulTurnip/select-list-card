@@ -18,15 +18,19 @@ The original Select List Card stopped working after Home Assistant 2025.5 due to
 
 **Original issue:** [Card not working after 2025.5](https://github.com/mattieha/select-list-card/issues/34) - Multiple users confirmed this fix resolves the problem.
 
-## ✨ Version 2.0.1 - Home Assistant Compatibility & Fixed Scrolling
+## ✨ Version 2.0.2 - Performance Optimizations & New Features
 
 **Major improvements:**
 - 🏠 **Home Assistant Compatibility** - Updated for recent Home Assistant versions
 - 🔧 **Fixed scrolling issues** - Proper scroll position management during updates
-- ⚡ **Better performance** - Optimized state updates and throttled rendering
-- 🎯 **Enhanced error handling** - Visual feedback for failed selections
+- ⚡ **Enhanced performance** - DOM caching, optimized rendering, and memory management
+- 🎯 **New scroll_behavior option** - Choose between smooth or instant scrolling
 - 🚫 **Improved UX** - Options disabled during selection to prevent conflicts
 - 🛡️ **Stability improvements** - Prevents render loops and multiple simultaneous selections
+- 🧹 **Memory optimization** - Better cleanup and resource management
+
+**Community Contributions:**
+- Performance optimizations and new features contributed by [@catohagen](https://github.com/catohagen)
 
 ![List animation][card-scroll-gif]
 
@@ -58,6 +62,7 @@ Select List Card supports Lovelace's Visual Editor. Click the + button to add a 
 | truncate           | boolean | `true`       | Truncate long option text to fit on one line                               |
 | scroll_to_selected | boolean | `true`       | Auto-scroll to the currently selected option when card opens               |
 | max_options        | number  | `5`          | Maximum visible options before scrollbar appears (0 = unlimited)           |
+| scroll_behavior    | string  | `smooth`     | Scroll animation type: `smooth` (animated) or `auto` (instant)             |
 
 ### Example Configuration
 
@@ -70,6 +75,7 @@ max_options: 6
 scroll_to_selected: true
 show_toggle: true
 truncate: true
+scroll_behavior: smooth
 ```
 
 ### Advanced Example
@@ -83,6 +89,7 @@ max_options: 0          # No scrollbar - show all options
 scroll_to_selected: false
 show_toggle: false
 truncate: false         # Show full text for long options
+scroll_behavior: auto   # Instant scrolling for quick selection
 ```
 
 ## 📦 Installation
