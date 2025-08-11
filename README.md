@@ -8,9 +8,14 @@ Display the options of an `input_select` entity as a clickable list card.
 In other words: the content of the dropdown menu is displayed as a card.  
 The `input_select.select_option` service is called after the user clicks (selects) an option.
 
-## ✨ Version 2.0.1 - Fixed Scrolling
+## 🙏 Credits
+
+This is a fork of the original [Select List Card](https://github.com/mattieha/select-list-card) by [mattieha](https://github.com/mattieha). All credit for the original concept and implementation goes to the original author. This fork was created to address compatibility issues with recent Home Assistant updates, while also improving scrolling behavior and performance.
+
+## ✨ Version 2.0.1 - Home Assistant Compatibility & Fixed Scrolling
 
 **Major improvements:**
+- 🏠 **Home Assistant Compatibility** - Updated for recent Home Assistant versions
 - 🔧 **Fixed scrolling issues** - Proper scroll position management during updates
 - ⚡ **Better performance** - Optimized state updates and throttled rendering
 - 🎯 **Enhanced error handling** - Visual feedback for failed selections
@@ -111,11 +116,13 @@ truncate: false         # Show full text for long options
 ### Browser Compatibility
 - Modern browsers with ES6+ support
 - Chrome 61+, Firefox 60+, Safari 12+, Edge 79+
+- **Compatible with Home Assistant 2024.x+**
 
 ### Dependencies
 - **None!** Pure vanilla JavaScript implementation
 - No external libraries or build process required
 - Self-contained Web Component
+- **Updated for recent Home Assistant API changes**
 
 ### Performance Features
 - Throttled updates prevent render loops
@@ -131,10 +138,15 @@ truncate: false         # Show full text for long options
 - Verify the resource is added correctly
 - Check browser console for errors
 - Ensure the entity exists and is an `input_select`
+- **For older Home Assistant versions**: Consider using the [original card](https://github.com/mattieha/select-list-card)
 
 **Scrolling problems:**
 - Update to version 2.0.1+ for scroll fixes
 - Check `scroll_to_selected` and `max_options` settings
+
+**Compatibility issues:**
+- This version is optimized for Home Assistant 2024.x+
+- For older HA versions, the original card may work better
 
 **Visual issues:**
 - Clear browser cache
@@ -162,16 +174,28 @@ Contributions are welcome! Please:
 4. Test thoroughly
 5. Submit a pull request
 
+### Original Repository
+
+This fork is based on the excellent work by [mattieha](https://github.com/mattieha). Consider contributing to the [original repository](https://github.com/mattieha/select-list-card) as well if your improvements are applicable to the original codebase.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
+## ☕ Support
+
+If this card helps you, consider buying me a coffee!
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://www.buymeacoffee.com/mattijsha)
+
+---
+
 <!-- References -->
 [hacs]: https://hacs.xyz
-[visual-editor]: https://raw.githubusercontent.com/mattieha/select-list-card/master/assets/visual_editor.png
-[card-scroll-gif]: https://raw.githubusercontent.com/mattieha/select-list-card/master/assets/card_scroll.gif
-[latest-release]: https://github.com/mattieha/select-list-card/releases/latest
-[add-translation]: https://github.com/mattieha/select-list-card/issues
-[releases-shield]: https://img.shields.io/github/release/mattieha/select-list-card.svg?style=for-the-badge
-[releases]: https://github.com/mattieha/select-list-card/releases
-[license-shield]: https://img.shields.io/github/license/mattieha/select-list-card.svg?style=for-the-badge
+[visual-editor]: https://raw.githubusercontent.com/DoubtfulTurnip/select-list-card/master/assets/visual_editor.png
+[card-scroll-gif]: https://raw.githubusercontent.com/DoubtfulTurnip/select-list-card/master/assets/card_scroll.gif
+[latest-release]: https://github.com/DoubtfulTurnip/select-list-card/releases/latest
+[add-translation]: https://github.com/DoubtfulTurnip/select-list-card/issues
+[releases-shield]: https://img.shields.io/github/release/DoubtfulTurnip/select-list-card.svg?style=for-the-badge
+[releases]: https://github.com/DoubtfulTurnip/select-list-card/releases
+[license-shield]: https://img.shields.io/github/license/DoubtfulTurnip/select-list-card.svg?style=for-the-badge
