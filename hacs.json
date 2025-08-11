@@ -2,6 +2,5 @@
     "name": "Select List Card",
     "content_in_root": false,
     "render_readme": true,
-    "domains": ["input_select"],
     "filename": "select-list-card.js"
 }
