@@ -1,6 +1,6 @@
 # Select List Card
 
-[![GitHub Release][releases-shield]][releases]
+[![GitHub Release][releases-shield]][releases] 
 [![License][license-shield]](LICENSE.md)
 [![hacs_badge](https://img.shields.io/badge/HACS-default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
