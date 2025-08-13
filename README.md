@@ -20,17 +20,6 @@ The original Select List Card stopped working after Home Assistant 2025.5 due to
 
 **Original issue:** [Card not working after 2025.5](https://github.com/mattieha/select-list-card/issues/34) - Multiple users confirmed this fix resolves the problem.
 
-## ✨ Version 2.0.2 - Performance Optimizations & New Features
-
-**Major improvements:**
-- 🏠 **Home Assistant Compatibility** - Updated for recent Home Assistant versions
-- 🔧 **Fixed scrolling issues** - Proper scroll position management during updates
-- ⚡ **Enhanced performance** - DOM caching, optimized rendering, and memory management
-- 🎯 **New scroll_behavior option** - Choose between smooth or instant scrolling
-- 🚫 **Improved UX** - Options disabled during selection to prevent conflicts
-- 🛡️ **Stability improvements** - Prevents render loops and multiple simultaneous selections
-- 🧹 **Memory optimization** - Better cleanup and resource management
-
 **Community Contributions:**
 - Performance optimizations and new features contributed by [@catohagen](https://github.com/catohagen)
 
