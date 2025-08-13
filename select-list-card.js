@@ -1,19 +1,13 @@
-// Select List Card - Standalone Version
-// No external dependencies required
+// Select List Card - Fixed Toggle Version 2.0.3
+// Fixes the toggle functionality issue
 
 console.info(
-  `%c  SELECT-LIST-CARD  \n%c  Version 2.0.2     `,
+  `%c  SELECT-LIST-CARD  \n%c  Version 2.0.3 (Fixed Toggle)     `,
   "color: orange; font-weight: bold; background: black",
   "color: white; font-weight: bold; background: dimgray"
 );
 
 class SelectListCard extends HTMLElement {
-  // Constants
-  static get UPDATE_THROTTLE_MS() { return 50; }
-  static get SELECTION_TIMEOUT_MS() { return 2000; }
-  static get ERROR_FEEDBACK_DURATION_MS() { return 2000; }
-  static get DEFAULT_ITEM_HEIGHT() { return 48; }
-
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -30,15 +24,6 @@ class SelectListCard extends HTMLElement {
     this._domCache = new Map();
     this._lastEntityState = null;
     this._lastOptions = null;
-    this._styleSheet = null;
-    
-    // Bind methods once
-    this._handleHeaderClick = this._handleHeaderClick.bind(this);
-    this._handleScroll = this._handleScroll.bind(this);
-    this._selectOption = this._selectOption.bind(this);
-    
-    // Create reusable style sheet
-    this._createStyleSheet();
   }
 
   static getConfigElement() {
@@ -70,25 +55,10 @@ class SelectListCard extends HTMLElement {
       throw new Error('Invalid configuration: entity must be an input_select');
     }
 
-    // Validate max_options
-    if (config.max_options !== undefined && (typeof config.max_options !== 'number' || config.max_options < 0)) {
-      throw new Error('Invalid configuration: max_options must be a number >= 0');
-    }
-
-    // Validate scroll_behavior
-    if (config.scroll_behavior && !['smooth', 'auto'].includes(config.scroll_behavior)) {
-      throw new Error('Invalid configuration: scroll_behavior must be "smooth" or "auto"');
-    }
-
-    // Validate icon format (basic check)
-    if (config.icon && typeof config.icon !== 'string') {
-      console.warn('Select List Card: Icon should be a string');
-    }
-
     // Set defaults
     this._config = {
       title: '',
-      icon: '',
+      icon: null,  // Changed from empty string to null
       show_toggle: false,
       truncate: true,
       scroll_to_selected: true,
@@ -97,6 +67,12 @@ class SelectListCard extends HTMLElement {
       ...config
     };
 
+    // Remove empty icon property if it exists
+    if (this._config.icon === '') {
+      delete this._config.icon;
+    }
+
+    // Start closed if toggle is enabled
     this._isOpen = !this._config.show_toggle;
     this._clearCache();
     this._updateCard();
@@ -119,23 +95,21 @@ class SelectListCard extends HTMLElement {
     const optionsChanged = JSON.stringify(this._lastOptions) !== JSON.stringify(entity.attributes.options);
     
     if (!stateChanged && !optionsChanged && oldHass) {
-      return; // Skip update if nothing changed
+      return;
     }
     
-    // Update cached values
     this._lastEntityState = entity.state;
     this._lastOptions = entity.attributes.options;
     
-    // Reset selection state if state changed externally
     if (stateChanged && this._isSelecting) {
       this._isSelecting = false;
     }
     
     // Throttle updates
     const now = performance.now();
-    if (now - this._lastUpdateTime < SelectListCard.UPDATE_THROTTLE_MS) {
+    if (now - this._lastUpdateTime < 50) {
       clearTimeout(this._updateTimeout);
-      this._updateTimeout = setTimeout(() => this._performUpdate(), SelectListCard.UPDATE_THROTTLE_MS);
+      this._updateTimeout = setTimeout(() => this._performUpdate(), 50);
       return;
     }
     
@@ -156,155 +130,6 @@ class SelectListCard extends HTMLElement {
     this._domCache.clear();
     this._lastEntityState = null;
     this._lastOptions = null;
-  }
-
-  _createStyleSheet() {
-    // Create styles as a template for reuse
-    this._styleTemplate = (maxHeight, itemHeight) => `
-      * {
-        box-sizing: border-box;
-      }
-      
-      .card-container {
-        background: var(--card-background-color, white);
-        border-radius: var(--ha-card-border-radius, 8px);
-        box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
-        overflow: hidden;
-        font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif);
-        -webkit-font-smoothing: antialiased;
-      }
-      
-      .card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        background: var(--primary-background-color, white);
-        border-bottom: 1px solid var(--divider-color, #e0e0e0);
-        font-weight: 500;
-        font-size: 16px;
-        user-select: none;
-        min-height: 56px;
-      }
-      
-      .card-header.clickable {
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-      
-      .card-header.clickable:hover {
-        background: var(--secondary-background-color, #fafafa);
-      }
-      
-      .header-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      
-      .header-icon {
-        width: 24px;
-        height: 24px;
-        color: var(--primary-color, #1976d2);
-      }
-      
-      .toggle-icon {
-        width: 24px;
-        height: 24px;
-        transition: transform 0.2s ease;
-        color: var(--secondary-text-color, #666);
-      }
-      
-      .toggle-icon.rotated {
-        transform: rotate(180deg);
-      }
-      
-      .options-container {
-        overflow: hidden;
-        transition: max-height 0.2s ease-in-out;
-        max-height: ${this._isOpen ? maxHeight : 0}px;
-      }
-      
-      .options-list {
-        max-height: ${maxHeight}px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        scroll-behavior: var(--scroll-behavior, smooth);
-        contain: layout style;
-      }
-      
-      .options-list::-webkit-scrollbar {
-        width: 8px;
-      }
-      
-      .options-list::-webkit-scrollbar-track {
-        background: var(--scrollbar-track-color, rgba(0, 0, 0, 0.05));
-        border-radius: 4px;
-      }
-      
-      .options-list::-webkit-scrollbar-thumb {
-        background: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
-        border-radius: 4px;
-      }
-      
-      .options-list::-webkit-scrollbar-thumb:hover {
-        background: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.3));
-      }
-      
-      .option-item {
-        display: flex;
-        align-items: center;
-        padding: 0 16px;
-        min-height: ${itemHeight}px;
-        cursor: pointer;
-        transition: background-color 0.15s ease;
-        border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.06));
-        font-size: 14px;
-        user-select: none;
-        contain: layout style;
-      }
-      
-      .option-item:last-child {
-        border-bottom: none;
-      }
-      
-      .option-item:not(.selected):hover {
-        background-color: var(--state-hover-color, rgba(0, 0, 0, 0.04));
-      }
-      
-      .option-item.selected {
-        background-color: var(--primary-color, #1976d2);
-        color: white;
-        font-weight: 500;
-      }
-      
-      .option-item.selected:hover {
-        background-color: var(--dark-primary-color, #1565c0);
-      }
-      
-      .option-item.disabled {
-        pointer-events: none;
-        opacity: 0.6;
-      }
-      
-      .option-text {
-        flex: 1;
-        line-height: 1.4;
-      }
-      
-      .option-text.truncate {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-      
-      .no-options {
-        padding: 16px;
-        text-align: center;
-        color: var(--secondary-text-color, #666);
-        font-style: italic;
-      }
-    `;
   }
 
   _saveScrollPosition() {
@@ -340,21 +165,12 @@ class SelectListCard extends HTMLElement {
       return;
     }
 
-    // Save scroll position before updating
     this._saveScrollPosition();
     this._isUpdating = true;
     
-    // Check if we need a full re-render or just update existing elements
-    const needsFullRender = this._needsFullRender(entity);
+    this._renderCard(entity);
+    this._domCache.clear();
     
-    if (needsFullRender) {
-      this._renderCard(entity);
-      this._domCache.clear(); // Only clear cache when we do full render
-    } else {
-      this._updateExistingElements(entity);
-    }
-    
-    // Use requestAnimationFrame for DOM operations
     requestAnimationFrame(() => {
       this._updateDisabledState(this._isSelecting);
       
@@ -367,28 +183,6 @@ class SelectListCard extends HTMLElement {
         }
       }
       this._isUpdating = false;
-    });
-  }
-
-  _needsFullRender(entity) {
-    // Check if options changed (requires full re-render)
-    const currentOptions = JSON.stringify(entity.attributes.options || []);
-    const lastOptions = JSON.stringify(this._lastOptions || []);
-    
-    // Check if we don't have a rendered card yet
-    const hasCard = this.shadowRoot?.querySelector('.card-container');
-    
-    return !hasCard || currentOptions !== lastOptions;
-  }
-
-  _updateExistingElements(entity) {
-    const currentValue = entity.state;
-    
-    // Update selected state on existing options
-    const optionElements = this.shadowRoot.querySelectorAll('.option-item');
-    optionElements.forEach(el => {
-      const isSelected = el.dataset.option === currentValue;
-      el.classList.toggle('selected', isSelected);
     });
   }
 
@@ -415,26 +209,191 @@ class SelectListCard extends HTMLElement {
     const currentValue = entity.state;
     const options = entity.attributes.options || [];
     
-    // Calculate dimensions
     const maxOptions = this._config.max_options === 0 ? options.length : Math.min(this._config.max_options, options.length);
-    const itemHeight = SelectListCard.DEFAULT_ITEM_HEIGHT;
+    const itemHeight = 48;
     const listMaxHeight = maxOptions * itemHeight;
 
-    // Generate styles
-    const styles = `<style>
-      :host {
-        --scroll-behavior: ${this._config.scroll_behavior};
-      }
-      ${this._styleTemplate(listMaxHeight, itemHeight)}
-    </style>`;
+    const styles = `
+      <style>
+        * {
+          box-sizing: border-box;
+        }
+        
+        .card-container {
+          background: var(--card-background-color, white);
+          border-radius: var(--ha-card-border-radius, 8px);
+          box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
+          overflow: hidden;
+          font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif);
+          -webkit-font-smoothing: antialiased;
+        }
+        
+        .card-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          background: var(--primary-background-color, white);
+          border-bottom: 1px solid var(--divider-color, #e0e0e0);
+          font-weight: 500;
+          font-size: 16px;
+          user-select: none;
+          min-height: 56px;
+        }
+        
+        .card-header.clickable {
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        
+        .card-header.clickable:hover {
+          background: var(--secondary-background-color, #fafafa);
+        }
+        
+        .card-header.clickable:active {
+          background: var(--divider-color, #e0e0e0);
+        }
+        
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .header-icon {
+          width: 24px;
+          height: 24px;
+          color: var(--primary-color, #1976d2);
+        }
+        
+        .toggle-icon {
+          width: 24px;
+          height: 24px;
+          transition: transform 0.2s ease;
+          color: var(--secondary-text-color, #666);
+          pointer-events: none; /* Ensure clicks pass through to header */
+        }
+        
+        .toggle-icon.rotated {
+          transform: rotate(180deg);
+        }
+        
+        .options-container {
+          overflow: hidden;
+          transition: max-height 0.2s ease-in-out;
+          max-height: ${this._isOpen ? listMaxHeight : 0}px;
+        }
+        
+        .options-list {
+          max-height: ${listMaxHeight}px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          scroll-behavior: var(--scroll-behavior, smooth);
+        }
+        
+        .options-list::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .options-list::-webkit-scrollbar-track {
+          background: var(--scrollbar-track-color, rgba(0, 0, 0, 0.05));
+          border-radius: 4px;
+        }
+        
+        .options-list::-webkit-scrollbar-thumb {
+          background: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2));
+          border-radius: 4px;
+        }
+        
+        .options-list::-webkit-scrollbar-thumb:hover {
+          background: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.3));
+        }
+        
+        .option-item {
+          display: flex;
+          align-items: center;
+          padding: 0 16px;
+          min-height: ${itemHeight}px;
+          cursor: pointer;
+          transition: background-color 0.15s ease;
+          border-bottom: 1px solid var(--divider-color, rgba(0, 0, 0, 0.06));
+          font-size: 14px;
+          user-select: none;
+        }
+        
+        .option-item:last-child {
+          border-bottom: none;
+        }
+        
+        .option-item:not(.selected):hover {
+          background-color: var(--state-hover-color, rgba(0, 0, 0, 0.04));
+        }
+        
+        .option-item.selected {
+          background-color: var(--primary-color, #1976d2);
+          color: white;
+          font-weight: 500;
+        }
+        
+        .option-item.selected:hover {
+          background-color: var(--dark-primary-color, #1565c0);
+        }
+        
+        .option-item.disabled {
+          pointer-events: none;
+          opacity: 0.6;
+        }
+        
+        .option-text {
+          flex: 1;
+          line-height: 1.4;
+        }
+        
+        .option-text.truncate {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        
+        .no-options {
+          padding: 16px;
+          text-align: center;
+          color: var(--secondary-text-color, #666);
+          font-style: italic;
+        }
+      </style>
+    `;
 
-    // Create header HTML (cached if title doesn't change)
-    const headerHTML = this._config.title ? this._createHeaderHTML() : '';
+    const chevronDown = `<svg class="toggle-icon ${this._isOpen ? 'rotated' : ''}" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>`;
+    
+    // Only show icon if it's defined and not empty
+    const customIcon = (this._config.icon && this._config.icon !== '') ? 
+      `<svg class="header-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>` : '';
 
-    // Create options HTML using document fragment for better performance
-    const optionsHTML = this._createOptionsHTML(options, currentValue);
+    const headerHTML = this._config.title ? `
+      <div class="card-header ${this._config.show_toggle ? 'clickable' : ''}">
+        <div class="header-left">
+          ${customIcon}
+          <span>${this._config.title}</span>
+        </div>
+        ${this._config.show_toggle ? chevronDown : ''}
+      </div>
+    ` : '';
 
-    // Update DOM in one operation
+    const optionsHTML = options.length > 0 ? options.map(option => {
+      const isSelected = currentValue === option;
+      const safeOption = this._escapeHtml(option);
+      
+      return `
+        <div class="option-item ${isSelected ? 'selected' : ''}" data-option="${safeOption}"
+             ${this._config.truncate ? `title="${safeOption}"` : ''}>
+          <div class="option-text ${this._config.truncate ? 'truncate' : ''}">
+            ${safeOption}
+          </div>
+        </div>
+      `;
+    }).join('') : '<div class="no-options">No options available</div>';
+
     this.shadowRoot.innerHTML = `
       ${styles}
       <div class="card-container">
@@ -447,44 +406,8 @@ class SelectListCard extends HTMLElement {
       </div>
     `;
 
-    // Add event listeners
+    // Attach event listeners immediately after rendering
     this._attachEventListeners();
-  }
-
-  _createHeaderHTML() {
-    const chevronDown = `<svg class="toggle-icon ${this._isOpen ? 'rotated' : ''}" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z"/></svg>`;
-    const customIcon = this._config.icon ? `<svg class="header-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>` : '';
-
-    return `
-      <div class="card-header ${this._config.show_toggle ? 'clickable' : ''}">
-        <div class="header-left">
-          ${customIcon}
-          <span>${this._config.title}</span>
-        </div>
-        ${this._config.show_toggle ? chevronDown : ''}
-      </div>
-    `;
-  }
-
-  _createOptionsHTML(options, currentValue) {
-    if (options.length === 0) {
-      return '<div class="no-options">No options available</div>';
-    }
-
-    // Use array join for better performance than string concatenation
-    return options.map(option => {
-      const isSelected = currentValue === option;
-      const safeOption = this._escapeHtml(option);
-      
-      return `
-        <div class="option-item ${isSelected ? 'selected' : ''}" data-option="${safeOption}"
-             ${this._config.truncate ? `title="${safeOption}"` : ''}>
-          <div class="option-text ${this._config.truncate ? 'truncate' : ''}">
-            ${safeOption}
-          </div>
-        </div>
-      `;
-    }).join('');
   }
 
   _escapeHtml(text) {
@@ -493,48 +416,52 @@ class SelectListCard extends HTMLElement {
     return div.innerHTML;
   }
 
-  _cleanup() {
-    // Remove event listeners
-    const header = this.shadowRoot?.querySelector('.card-header.clickable');
-    if (header) {
-      header.removeEventListener('click', this._handleHeaderClick);
-    }
-    
-    const optionsList = this.shadowRoot?.querySelector('.options-list');
-    if (optionsList) {
-      optionsList.removeEventListener('scroll', this._handleScroll);
-    }
-  }
-
   _attachEventListeners() {
-    // Clean up existing listeners first
-    this._cleanup();
-    
-    // Header click listener
-    const header = this.shadowRoot.querySelector('.card-header.clickable');
-    if (header) {
-      header.addEventListener('click', this._handleHeaderClick);
+    // Header click listener for toggle
+    if (this._config.show_toggle) {
+      const header = this.shadowRoot.querySelector('.card-header.clickable');
+      if (header) {
+        // Use a named function so we can remove it if needed
+        const handleClick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this._handleHeaderClick();
+        };
+        
+        // Remove any existing listener and add new one
+        header.removeEventListener('click', handleClick);
+        header.addEventListener('click', handleClick);
+        
+        // Also handle touch for mobile
+        header.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+        }, { passive: true });
+      }
     }
 
     // Option click listeners using event delegation
     const optionsList = this.shadowRoot.querySelector('.options-list');
     if (optionsList) {
-      optionsList.addEventListener('click', (e) => {
+      const handleOptionClick = (e) => {
         const optionItem = e.target.closest('.option-item');
         if (optionItem && !optionItem.classList.contains('disabled')) {
           const option = optionItem.dataset.option;
           this._selectOption(option);
         }
-      });
+      };
+      
+      optionsList.removeEventListener('click', handleOptionClick);
+      optionsList.addEventListener('click', handleOptionClick);
 
-      // Scroll listener with passive flag for better performance
-      optionsList.addEventListener('scroll', this._handleScroll, { passive: true });
-    }
-  }
-
-  _handleScroll() {
-    if (!this._isUpdating) {
-      this._scrollPosition = this._getCachedElement('options-list')?.scrollTop || 0;
+      // Scroll listener
+      const handleScroll = () => {
+        if (!this._isUpdating) {
+          this._scrollPosition = optionsList.scrollTop;
+        }
+      };
+      
+      optionsList.removeEventListener('scroll', handleScroll);
+      optionsList.addEventListener('scroll', handleScroll, { passive: true });
     }
   }
 
@@ -559,7 +486,6 @@ class SelectListCard extends HTMLElement {
       const itemTop = selectedItem.offsetTop;
       const itemHeight = selectedItem.clientHeight;
       
-      // Calculate scroll position to center the selected item
       const scrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
       const maxScroll = container.scrollHeight - containerHeight;
       const targetScroll = Math.max(0, Math.min(scrollTop, maxScroll));
@@ -590,13 +516,12 @@ class SelectListCard extends HTMLElement {
       this._updateDisabledState(false);
     }
     
-    // Failsafe timeout
     setTimeout(() => {
       if (this._isSelecting) {
         this._isSelecting = false;
         this._updateDisabledState(false);
       }
-    }, SelectListCard.SELECTION_TIMEOUT_MS);
+    }, 2000);
   }
 
   _showErrorFeedback(option) {
@@ -608,13 +533,12 @@ class SelectListCard extends HTMLElement {
         setTimeout(() => {
           el.style.backgroundColor = '';
           el.style.color = '';
-        }, SelectListCard.ERROR_FEEDBACK_DURATION_MS);
+        }, 2000);
       }
     });
   }
 
   _updateDisabledState(disabled) {
-    // Use cached selector or query once
     const optionElements = this.shadowRoot.querySelectorAll('.option-item');
     optionElements.forEach(el => {
       el.classList.toggle('disabled', disabled);
@@ -638,11 +562,9 @@ class SelectListCard extends HTMLElement {
     return Math.max(size, 1);
   }
 
-  // Cleanup method for better memory management
   disconnectedCallback() {
     clearTimeout(this._updateTimeout);
     this._domCache.clear();
-    this._cleanup();
   }
 }
 
