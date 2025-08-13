@@ -368,7 +368,7 @@ class SelectListCard extends HTMLElement {
     
     // Only show icon if it's defined and not empty
     const customIcon = (this._config.icon && this._config.icon !== '') ? 
-      `<svg class="header-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>` : '';
+      `<ha-icon class="header-icon" icon="${this._config.icon}"></ha-icon>` : '';
 
     const headerHTML = this._config.title ? `
       <div class="card-header ${this._config.show_toggle ? 'clickable' : ''}">
